@@ -24,3 +24,11 @@ export {
   type RateLimiterOptions,
 } from "./rate-limiter.js";
 export { evaluateIpFilter, parseIpList, matchesIpRule } from "./firewall.js";
+export {
+  TieredFeeScheduler,
+  DEFAULT_FEE_TIERS,
+  type FeeTier,
+  type ClientVolumeRecord,
+  type TierEvaluation,
+  type TieredFeeSchedulerOptions,
+} from "./tiered-fee-scheduler.js";
