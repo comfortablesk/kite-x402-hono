@@ -1,5 +1,8 @@
 import { describe, it, expect } from "bun:test";
-import { TieredFeeScheduler, DEFAULT_FEE_TIERS } from "../src/tiered-fee-scheduler.js";
+import {
+  TieredFeeScheduler,
+  DEFAULT_FEE_TIERS,
+} from "../src/tiered-fee-scheduler.js";
 
 describe("TieredFeeScheduler", () => {
   it("defaults new clients to Standard tier with zero discount", () => {
@@ -37,7 +40,11 @@ describe("TieredFeeScheduler", () => {
     const scheduler = new TieredFeeScheduler({
       tiers: [
         { name: "Normal", minCumulativeVolumeAtomic: 0n, discountBps: 0 },
-        { name: "Partner", minCumulativeVolumeAtomic: 5_000_000n, discountBps: 2000 }, // 20%
+        {
+          name: "Partner",
+          minCumulativeVolumeAtomic: 5_000_000n,
+          discountBps: 2000,
+        }, // 20%
       ],
       epochTtlMs: 10, // 10ms
     });

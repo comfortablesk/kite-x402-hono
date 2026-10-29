@@ -32,11 +32,11 @@ export interface TieredFeeSchedulerOptions {
 }
 
 export const DEFAULT_FEE_TIERS: FeeTier[] = [
-  { name: 'Standard', minCumulativeVolumeAtomic: 0n, discountBps: 0 },
-  { name: 'Bronze', minCumulativeVolumeAtomic: 10_000_000n, discountBps: 500 }, // $10 -> 5% off
-  { name: 'Silver', minCumulativeVolumeAtomic: 50_000_000n, discountBps: 1000 }, // $50 -> 10% off
-  { name: 'Gold', minCumulativeVolumeAtomic: 200_000_000n, discountBps: 1500 }, // $200 -> 15% off
-  { name: 'VIP', minCumulativeVolumeAtomic: 1_000_000_000n, discountBps: 2500 }, // $1000 -> 25% off
+  { name: "Standard", minCumulativeVolumeAtomic: 0n, discountBps: 0 },
+  { name: "Bronze", minCumulativeVolumeAtomic: 10_000_000n, discountBps: 500 }, // $10 -> 5% off
+  { name: "Silver", minCumulativeVolumeAtomic: 50_000_000n, discountBps: 1000 }, // $50 -> 10% off
+  { name: "Gold", minCumulativeVolumeAtomic: 200_000_000n, discountBps: 1500 }, // $200 -> 15% off
+  { name: "VIP", minCumulativeVolumeAtomic: 1_000_000_000n, discountBps: 2500 }, // $1000 -> 25% off
 ];
 
 export class TieredFeeScheduler {
@@ -49,14 +49,17 @@ export class TieredFeeScheduler {
     const unsortedTiers = options.tiers ?? DEFAULT_FEE_TIERS;
     // Sort descending by minCumulativeVolumeAtomic for waterfall evaluation
     this.tiers = [...unsortedTiers].sort((a, b) =>
-      b.minCumulativeVolumeAtomic > a.minCumulativeVolumeAtomic ? 1 : -1
+      b.minCumulativeVolumeAtomic > a.minCumulativeVolumeAtomic ? 1 : -1,
     );
   }
 
   /**
    * Records a settled payment for a client.
    */
-  public recordPayment(clientAddress: string, settledAmountAtomic: bigint): ClientVolumeRecord {
+  public recordPayment(
+    clientAddress: string,
+    settledAmountAtomic: bigint,
+  ): ClientVolumeRecord {
     const key = clientAddress.toLowerCase();
     const now = Date.now();
     let record = this.clientVolumes.get(key);
@@ -81,7 +84,10 @@ export class TieredFeeScheduler {
   /**
    * Evaluates the active tier and computes the discounted payment price.
    */
-  public calculateFee(clientAddress: string, baseAmountAtomic: bigint): TierEvaluation {
+  public calculateFee(
+    clientAddress: string,
+    baseAmountAtomic: bigint,
+  ): TierEvaluation {
     const key = clientAddress.toLowerCase();
     const now = Date.now();
     const record = this.clientVolumes.get(key);
@@ -92,7 +98,11 @@ export class TieredFeeScheduler {
         : 0n;
 
     // Find the matching tier
-    let activeTier = this.tiers[this.tiers.length - 1]; // fallback lowest
+    let activeTier: FeeTier = this.tiers[this.tiers.length - 1] ?? {
+      name: "Standard",
+      minCumulativeVolumeAtomic: 0n,
+      discountBps: 0,
+    };
     for (const tier of this.tiers) {
       if (activeVolume >= tier.minCumulativeVolumeAtomic) {
         activeTier = tier;
@@ -100,7 +110,8 @@ export class TieredFeeScheduler {
       }
     }
 
-    const discountAtomic = (baseAmountAtomic * BigInt(activeTier.discountBps)) / 10000n;
+    const discountAtomic =
+      (baseAmountAtomic * BigInt(activeTier.discountBps)) / 10000n;
     const finalAmountAtomic = baseAmountAtomic - discountAtomic;
 
     return {
@@ -117,7 +128,9 @@ export class TieredFeeScheduler {
   /**
    * Retrieves client record.
    */
-  public getClientRecord(clientAddress: string): ClientVolumeRecord | undefined {
+  public getClientRecord(
+    clientAddress: string,
+  ): ClientVolumeRecord | undefined {
     return this.clientVolumes.get(clientAddress.toLowerCase());
   }
 
